@@ -1,0 +1,50 @@
+ORG 0000H         ; Start of program
+MOV DPTR, #8500H  ; Point to external memory location
+MOVX A, @DPTR     ; Read value from external memory
+MOV B, A          ; Copy value to register B
+MOV R0, A         ; Copy value to register R0
+
+JZ NO_OPERATION   ; If input is zero, skip multiplication
+
+MUL AB            ; Multiply A × B (A = lower byte, B = upper byte)
+MOV R1, A         ; Store lower byte of result in R1
+MOV R2, B         ; Store upper byte of result in R2
+
+; Perform additional multiplication for higher accuracy
+MOV B, R0         ; Move input value to B
+MUL AB            ; A × B again
+MOV R3, A         ; Store lower byte in R3
+MOV R4, B         ; Store upper byte in R4
+
+; Handle carry-over addition
+MOV B, R2         ; Move R2 to B
+MOV A, R0         ; Move input value to A
+MUL AB            ; A × B
+MOV R5, B         ; Store upper byte in R5
+ADD A, R2         ; Add to R2
+MOV R6, A         ; Store sum in R6
+
+; Store result in external memory
+INC DPTR
+MOV A, R3
+MOVX @DPTR, A     ; Store lower byte at 8501H
+
+INC DPTR
+MOV A, R6
+MOVX @DPTR, A     ; Store higher byte at 8502H
+
+INC DPTR
+MOV A, R5
+MOVX @DPTR, A     ; Store carry at 8503H
+
+; Turn ON LED at P1.0 to indicate multiplication success
+SETB P1.0         ; Turn ON LED
+
+SJMP END          ; Jump to end of program
+
+NO_OPERATION:
+CLR P1.0          ; Turn OFF LED if no operation
+END:
+SJMP END          ; Infinite loop
+
+END               ; End of program
