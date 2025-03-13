@@ -1,0 +1,28 @@
+ORG 0H
+MOV DPTR, #8500H
+MOVX A, @DPTR
+MOV R0, A
+MOV R1, #00H
+MOV R2, #00H
+
+L1:
+    INC DPTR
+    MOVX A, @DPTR
+    ADD A, R1
+    JC L2
+    SJMP L3
+
+L2:
+    INC R2
+
+L3:
+    MOV R1, A
+    DJNZ R0, L1
+
+INC DPTR
+MOV A, R1
+MOVX @DPTR, A
+
+HERE: SJMP HERE
+
+END
